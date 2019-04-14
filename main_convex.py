@@ -25,8 +25,10 @@ import pygmo as pg
 def moea(name, solsize, popsize, wscalar_, moea_type, max_gen=float('inf'), timeLimit=float('inf')):
     from platypus import Problem, TournamentSelector
     from platypus import NSGAII, NSGAIII, SPEA2
-    from _platypus.operators import varOr, mutGauss, cxUniform, RealGauss
-    from _platypus.algorithms import SMSEMOA
+    
+    from platyplus.operators import varOr, mutGauss, cxUniform
+    from platyplus.types import RealGauss
+    from platyplus.algorithms import SMSEMOA
     
     
     N = wscalar_.xdim
@@ -60,7 +62,7 @@ def moea(name, solsize, popsize, wscalar_, moea_type, max_gen=float('inf'), time
         alg = SPEA2(problem, population_size=popsize,
                      selector=TournamentSelector(1),
                      variator=vartor)
-    elif moea_type == 'SMSa':
+    elif moea_type == 'SMSdom':
         alg = SMSEMOA(problem, population_size=popsize,
                      selector=TournamentSelector(1),
                      variator=vartor,
@@ -184,7 +186,7 @@ ffunc = {'NSGAII': moea,
          'NSGAIII': moea,
          'SPEA2': moea,
          'SMS': moea,
-         'SMSa': moea,
+         'SMSdom': moea,
          'random': runRandom,
          'monise': runMonise,
          'pgen': runPgen,
@@ -260,7 +262,7 @@ def trainInstance(parameters):
     
     for algorithm in algorithms:
         results[algorithm] = {}
-        if algorithm in ['NSGAII', 'NSGAIII', 'SPEA2', 'SMS', 'SMSa']:
+        if algorithm in ['NSGAII', 'NSGAIII', 'SPEA2', 'SMS', 'SMSdom']:
             sols, time = safeRun(algorithm, name, solsize, solsize,
                                  wscalar_, algorithm, timeLimit=targetTime,
                                  rerun=rerun)
@@ -334,12 +336,11 @@ if __name__ == "__main__":
                   'random',
                   'nc',
                   'pgen',
-                  #'xnise',
                   'rennen',
                   'NSGAII',
                   'NSGAIII',
                   'SPEA2',
-                  'SMSa',
+                  'SMSdom',
                   ]
     
     algorithms2 = [
@@ -347,12 +348,11 @@ if __name__ == "__main__":
                   'random',
                   'nc',
                   'pgen',
-                  #'xnise',
                   'norennen',
                   'NSGAII',
                   'NSGAIII',
                   'SPEA2',
-                  'SMSa',
+                  'SMSdom',
                   ]
 
     instances = ['emotions', 'flags' ,'yeast','birds','genbase']

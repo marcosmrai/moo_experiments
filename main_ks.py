@@ -19,15 +19,16 @@ from scalarization.ks import ks_data
 from scalarization.ks_scalar import weighted_scalar, single_scalar, \
                                     normal_scalar
 
-from moopt import monise, nc, ngen, rennen, xnise, random_weights
+from moopt import monise, nc, pgen, rennen, xnise, random_weights
 import pygmo as pg
 
 def moea(name, solsize, popsize, wscalar_, moea_type, max_gen=float('inf'), timeLimit=float('inf')):
     from platypus import HUX, BitFlip, TournamentSelector
     from platypus import Problem, Binary
     from platypus import NSGAII, NSGAIII, SPEA2
-    from _platypus.operators import varOr
-    from _platypus.algorithms import SMSEMOA
+    
+    from platyplus.operators import varOr
+    from platyplus.algorithms import SMSEMOA
     
     time_start = time.perf_counter()
     logger.info('Running '+moea_type+' in '+name)
@@ -58,7 +59,7 @@ def moea(name, solsize, popsize, wscalar_, moea_type, max_gen=float('inf'), time
         alg = SPEA2(problem, population_size=popsize,
                      selector=TournamentSelector(1),
                      variator=vartor)
-    elif moea_type in ['SMS', 'SMSa', 'SMS-4']:
+    elif moea_type in ['SMSdom']:
         alg = SMSEMOA(problem, population_size=popsize,
                      selector=TournamentSelector(1),
                      variator=vartor,
@@ -110,23 +111,23 @@ def runMonise(name, solsize, wscalar_, sscalar_):
     return moniseSols, monise_time
 
 
-def runNgen(name, solsize, wscalar_, sscalar_):
+def runPgen(name, solsize, wscalar_, sscalar_):
     time_start = time.perf_counter()
-    moo_ = ngen(weightedScalar=wscalar_, singleScalar=sscalar_,
+    moo_ = pgen(weightedScalar=wscalar_, singleScalar=sscalar_,
                 targetSize=solsize, norm=True, timeLimit=3600)
-    logger.info('Running NGEN in '+name)
+    logger.info('Running PGEN in '+name)
     moo_.optimize()
-    ngenSols = [np.array(sol.objs) for sol in moo_.solutionsList]
-    ngen_time = time.perf_counter() - time_start
+    pgenSols = [np.array(sol.objs) for sol in moo_.solutionsList]
+    pgen_time = time.perf_counter() - time_start
 
-    return ngenSols, ngen_time
+    return pgenSols, pgen_time
 
 
 def runXnise(name, solsize, wscalar_, sscalar_):
     time_start = time.perf_counter()
     moo_ = xnise(weightedScalar=wscalar_, singleScalar=sscalar_,
                  targetSize=solsize, norm=True)
-    logger.info('Running NGEN in '+name)
+    logger.info('Running xnise in '+name)
     moo_.optimize()
     xniseSols = [np.array(sol.objs) for sol in moo_.solutionsList]
     xnise_time = time.perf_counter() - time_start
@@ -138,7 +139,7 @@ def runRennen(name, solsize, wscalar_, sscalar_):
     time_start = time.perf_counter()
     moo_ = rennen(weightedScalar=wscalar_, singleScalar=sscalar_,
                   targetSize=solsize, norm=True, timeLimit=3600)
-    logger.info('Running NGEN in '+name)
+    logger.info('Running rennen in '+name)
     try:
         moo_.optimize()
         rennenSols = [np.array(sol.objs) for sol in moo_.solutionsList]
@@ -170,15 +171,14 @@ def runNC(name, solsize, nscalar_, sscalar_):
 ffunc = {'NSGAII': moea,
          'NSGAIII': moea,
          'SPEA2': moea,
-         'SMS': moea,
-         'SMSa': moea,
+         'SMSdom': moea,
          'NSGAII-2': moea,
          'NSGAIII-2': moea,
          'SPEA2-2': moea,
          'SMShv': moea,
          'random': runRandom,
          'monise': runMonise,
-         'ngen': runNgen,
+         'pgen': runPgen,
          'xnise': runXnise,
          'rennen': runRennen,
          'norennen': runNoRennen,
@@ -248,7 +248,7 @@ def trainInstance(parameters):
     
     for algorithm in algorithms:
         results[algorithm] = {}
-        if algorithm in ['NSGAII', 'NSGAIII', 'SPEA2', 'SMS', 'SMSa']:
+        if algorithm in ['NSGAII', 'NSGAIII', 'SPEA2', 'SMShv', 'SMSdom']:
             sols, time = safeRun(algorithm, name, solsize, solsize,
                                  wscalar_, algorithm, timeLimit=targetTime,
                                  rerun=rerun)
@@ -311,26 +311,26 @@ if __name__ == "__main__":
                   'monise',
                   'random',
                   'nc',
-                  'ngen',
+                  'pgen',
                   #'xnise',
                   'rennen',
                   'NSGAII',
                   'NSGAIII',
                   'SPEA2',
-                  'SMSa',
+                  'SMSdom',
                   ]
     
     algorithms2 = [
                   'monise',
                   'random',
                   'nc',
-                  'ngen',
+                  'pgen',
                   #'xnise',
                   'norennen',
                   'NSGAII',
                   'NSGAIII',
                   'SPEA2',
-                  'SMSa',
+                  'SMSdom',
                   ]
 
     instances = []

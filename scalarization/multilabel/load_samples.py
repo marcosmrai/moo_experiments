@@ -30,7 +30,6 @@ def load_samples(name):
     with open(__FILE_FOLDER+'bases/'+name+'/info.yaml', 'r') as stream:
         geral = yaml.load(stream)
 
-    print(geral)
     data = pandas_read(__FILE_FOLDER+'bases/'+name+'/data.csv')
     X = data[:, :-geral['outputs']]
     nonzero = np.where(X.std(axis=0)!=0)[0]
