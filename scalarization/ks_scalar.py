@@ -58,7 +58,7 @@ class ks_base():
 
     @property
     def x(self):
-        return self.__x
+        return self.__x[:self.xdim]
 
     @property
     def seq(self):
@@ -163,11 +163,6 @@ class weighted_scalar(ks_base, w_interface, scalar_interface):
         '''Property method'''
         return self.__w
 
-    @property
-    def x(self):
-        '''Property method'''
-        return self.__x[:self.xdim]
-
     def optimize(self, w, solutionsList=None):
 
         if len(w) != self.M:
@@ -202,10 +197,6 @@ class single_scalar(ks_base, single_interface, scalar_interface):
     @property
     def w(self):
         return self.__w
-
-    @property
-    def x(self):
-        return self.__x[:self.xdim]
 
     def optimize(self, i, solutionsList=None):
         self.__w = np.array([0]*self.M)
@@ -287,10 +278,6 @@ class box_scalar(ks_base, box_interface, scalar_interface):
     @property
     def alpha(self):
         return self.__alpha
-
-    @property
-    def x(self):
-        return self.__x[:self.xdim]
 
     def __calcAlpha(self, objs):
         """Calculates alpha

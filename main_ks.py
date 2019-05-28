@@ -242,7 +242,7 @@ def trainInstance(parameters):
     wscalar_ = weighted_scalar(data_)
     nscalar_ = normal_scalar(data_)
 
-    solsize = 5*wscalar_.M
+    solsize = 10*wscalar_.M
     
     results = {}
     
@@ -332,12 +332,14 @@ if __name__ == "__main__":
                   'SPEA2',
                   'SMSdom',
                   ]
+    
+    #algorithms2 = algorithms = ['monise']
 
     instances = []
-    for M in [5, 10, 15, 20, 25]:
+    for M in [5, 10, 15, 20]:#, 25]:
         for obj_rel in ['RANDU']:#['EXP', 'CONFL', 'RAND'][:1]:
             for obj_scale in ['flat']:
-                for cap_rate in [0.02, 0.2]:
+                for cap_rate in [0.02, 0.04]:
                     M=M
                     N=100
                     obj_rel=obj_rel
@@ -349,12 +351,12 @@ if __name__ == "__main__":
                     instances += ['ks_M'+str(M)+'_N'+str(N)+'_C'+str(cap_rate)+'_'
                                   +obj_rel+'_' +obj_scale+'_' +weights_distr]
 
-    train_list = [(name, algorithms) for name in instances[:3]]+[(name, algorithms2) for name in instances[3:]]
+    train_list = [(name, algorithms) for name in instances[:4]]+[(name, algorithms2) for name in instances[4:]]
 
     if DEBUG:
         outs = [trainInstance(l) for l in train_list]
     else:
-        p = Pool(5)
+        p = Pool(7)
         outs = p.map(trainInstance, train_list)
 
     outsHv = [out[0] for out in outs]

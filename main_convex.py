@@ -256,7 +256,7 @@ def trainInstance(parameters):
     nscalar_ = nsSPMTLogisticRegression(X, Y, solver_params=solver_params)
 
 
-    solsize = 5*M
+    solsize = 10*M
     
     results = {}
     
@@ -314,7 +314,7 @@ def trainInstance(parameters):
 import csv
 
 
-DEBUG = True
+DEBUG = False
 
 import signal, os
 
@@ -364,7 +364,7 @@ if __name__ == "__main__":
     if DEBUG:
         outs = [trainInstance(l) for l in train_list]
     else:
-        p = Pool(3)
+        p = Pool(5)
         outs = p.map(trainInstance, train_list)
 
     outsHv = [out[0] for out in outs]
