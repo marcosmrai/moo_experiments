@@ -17,9 +17,9 @@ import pickle
 
 from scalarization.ks import ks_data
 from scalarization.ks_scalar import weighted_scalar, single_scalar, \
-                                    normal_scalar
+                                    normal_scalar, box_scalar
 
-from moopt import monise, nc, pgen, rennen, xnise, random_weights
+from moopt import monise, nc, pgen, rennen, xnise, random_weights, esse
 import pygmo as pg
 
 def moea(name, solsize, popsize, wscalar_, moea_type, max_gen=float('inf'), timeLimit=float('inf')):
@@ -97,6 +97,16 @@ def runRandom(name, solsize, wscalar_, sscalar_):
     wrand_time = time.perf_counter() - time_start
     return wrandSols, wrand_time
 
+
+def runESSE(name, solsize, box_scalar_, sscalar_):
+    time_start = time.perf_counter()
+    moo_ = esse(boxScalar=box_scalar_, singleScalar=sscalar_,
+                          targetSize=solsize)
+    logger.info('Running ESSE in '+name)
+    moo_.optimize()
+    esseSols = [np.array(sol.objs) for sol in moo_.solutionsList]
+    esse_time = time.perf_counter() - time_start
+    return esseSols, esse_time
 
 def runMonise(name, solsize, wscalar_, sscalar_):
     time_start = time.perf_counter()
@@ -182,7 +192,8 @@ ffunc = {'NSGAII': moea,
          'xnise': runXnise,
          'rennen': runRennen,
          'norennen': runNoRennen,
-         'nc': runNC}
+         'nc': runNC,
+         'esse':runESSE}
 
 
 def safeRun(method, name, solsize, *args, rerun=False, **kwargs):
@@ -241,6 +252,7 @@ def trainInstance(parameters):
     sscalar_ = single_scalar(data_)
     wscalar_ = weighted_scalar(data_)
     nscalar_ = normal_scalar(data_)
+    box_scalar_ = box_scalar(data_)
 
     solsize = 10*wscalar_.M
     
@@ -258,6 +270,8 @@ def trainInstance(parameters):
                                  rerun=rerun)
         elif algorithm in ['nc']:
             sols, time = safeRun(algorithm, name, solsize, nscalar_, sscalar_)
+        elif algorithm in ['esse']:
+            sols, time = safeRun(algorithm, name, solsize, box_scalar_, sscalar_)
         else:
             sols, time = safeRun(algorithm, name, solsize, wscalar_, sscalar_)
         results[algorithm]['sols'] = sols
@@ -301,42 +315,44 @@ def trainInstance(parameters):
             [name]+[results[algorithm]['Nsols'] for algorithm in algorithms]]
 
 
-DEBUG = False
+DEBUG = True
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     
     algorithms = [
+    		  'esse',
                   'monise',
                   'random',
-                  'nc',
-                  'pgen',
+                  #'nc',
+                  #'pgen',
                   #'xnise',
-                  'rennen',
-                  'NSGAII',
-                  'NSGAIII',
-                  'SPEA2',
-                  'SMSdom',
+                  #'rennen',
+                  #'NSGAII',
+                  #'NSGAIII',
+                  #'SPEA2',
+                  #'SMSdom',
                   ]
     
     algorithms2 = [
+    		  'esse',
                   'monise',
                   'random',
-                  'nc',
-                  'pgen',
+                  #'nc',
+                  #'pgen',
                   #'xnise',
-                  'norennen',
-                  'NSGAII',
-                  'NSGAIII',
-                  'SPEA2',
-                  'SMSdom',
+                  #'norennen',
+                  #'NSGAII',
+                  #'NSGAIII',
+                  #'SPEA2',
+                  #'SMSdom',
                   ]
     
     #algorithms2 = algorithms = ['monise']
 
     instances = []
-    for M in [5, 10, 15, 20]:#, 25]:
+    for M in [5, 10, 15]:#, 20]:#, 25]:
         for obj_rel in ['RANDU']:#['EXP', 'CONFL', 'RAND'][:1]:
             for obj_scale in ['flat']:
                 for cap_rate in [0.02, 0.04]:

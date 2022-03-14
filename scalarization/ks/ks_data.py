@@ -124,7 +124,7 @@ class data_ks():
             return False
         
         with open(DATA_PATH+'bases/'+self.name+'.yaml', 'r') as stream:
-            instance = yaml.load(stream)
+            instance = yaml.safe_load(stream)
             
         self.M = instance['M']
         self.N = instance['N']
